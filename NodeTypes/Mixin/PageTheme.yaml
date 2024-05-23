@@ -1,0 +1,38 @@
+##
+# Mixin to be added to any page that should be allowed to set or override the theme properties.
+# The properties of this mixin are used to render CSS variables and are selectable in the data sources provided
+# with this plugin.
+#
+# The mixin adds an inspector tab for the default light theme and a default group for the main theme properties.
+#
+'Shel.Neos.ThemeBuilder:Mixin.PageTheme':
+  abstract: true
+  ui:
+    inspector:
+      tabs:
+        themeLight:
+          label: 'Light theme'
+          icon: sun
+          position: end
+      groups:
+        themeMain:
+          label: 'Main'
+          icon: font
+          tab: themeLight
+          collapsed: true
+  # Add your custom theme properties here
+#  properties:
+#    primaryColor:
+#      options:
+#        preset: 'themeBuilder.colorPicker'
+#      ui:
+#        label: 'Primary color'
+#        inspector:
+#          group: 'themeMain'
+#    defaultPadding:
+#      options:
+#        preset: 'themeBuilder.pixelRange'
+#      ui:
+#        label: 'Default padding'
+#        inspector:
+#          group: 'themeMain'

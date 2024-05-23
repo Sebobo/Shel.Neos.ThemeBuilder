@@ -1,0 +1,8 @@
+prototype(Neos.Neos:Page) {
+    head.stylesheets.themeCSSVariables = Neos.Fusion:Component {
+        cssSelector = 'body'
+        renderer = Shel.Neos.ThemeBuilder:Helper.ThemeCSSVariables {
+            @process.wrap = ${'<style>' + props.cssSelector + ' { ' + value + ' }</style>'}
+        }
+    }
+}

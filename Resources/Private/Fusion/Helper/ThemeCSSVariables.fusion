@@ -1,0 +1,7 @@
+##
+# Renders the merged theme properties for the current page as CSS variables
+#
+prototype(Shel.Neos.ThemeBuilder:Helper.ThemeCSSVariables) {
+    @class = 'Shel\\Neos\\ThemeBuilder\\Fusion\\ThemeCSSVariablesImplementation'
+    node = ${documentNode}
+}

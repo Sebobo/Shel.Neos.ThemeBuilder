@@ -1,0 +1,40 @@
+Neos:
+  Neos:
+    nodeTypes:
+      presets:
+        properties:
+          'themeBuilder':
+            'colorPicker':
+              type: string
+              ui:
+                reloadPageIfChanged: true
+                inspector:
+                  editor: 'Shel.Neos.ColorPicker/ColorPickerEditor'
+                  editorOptions:
+                    mode: rgba
+            'pixelRange':
+              type: integer
+              ui:
+                reloadPageIfChanged: true
+                inspector:
+                  editor: Neos.Neos/Inspector/Editors/RangeEditor
+                  editorOptions:
+                    disabled: true
+                    minLabel: 'Minimum'
+                    maxLabel: 'Maximum'
+                    min: 0
+                    max: 100
+                    step: 5
+                    unit: px
+            'colorSelector':
+              type: string
+              ui:
+                reloadPageIfChanged: true
+                inspector:
+                  group: 'design'
+                  editor: 'Neos.Neos/Inspector/Editors/SelectBoxEditor'
+                  editorOptions:
+                    dataSourceIdentifier: 'shel-neos-themebuilder-theme-colors'
+                    dataSourceDisableCaching: true
+                    placeholder: 'Standard'
+                    allowEmpty: true
