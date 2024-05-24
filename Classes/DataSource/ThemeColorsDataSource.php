@@ -55,28 +55,47 @@ class ThemeColorsDataSource extends AbstractDataSource
         /** @var ContentContext $context */
         $context = $node->getContext();
         $siteNode = $context->getCurrentSiteNode();
-        $closestNodeWithPalette = (new FlowQuery([$node]))->closest('[instanceof ' . ThemePropertyHelper::PAGE_THEME_MIXIN . ']')->get(0);
+        $closestThemedNode = (new FlowQuery([$node]))->closest(
+            '[instanceof ' . ThemePropertyHelper::PAGE_THEME_MIXIN . ']'
+        )->get(0);
 
-        $paletteNodeType = $this->nodeTypeManager->getNodeType(ThemePropertyHelper::PAGE_THEME_MIXIN);
-        $paletteProperties = $paletteNodeType->getProperties();
-        $groups = $paletteNodeType->getConfiguration('ui.inspector.groups');
+        $themeNodeType = $this->nodeTypeManager->getNodeType(ThemePropertyHelper::PAGE_THEME_MIXIN);
+        $themeProperties = $themeNodeType->getProperties();
+        $groups = $themeNodeType->getConfiguration('ui.inspector.groups');
 
-        // TODO: Filter properties to only return colors
-
-        return array_map(
-            function (string $propertyName) use ($closestNodeWithPalette, $siteNode, $paletteProperties, $groups) {
-                return $this->createPaletteColor(
-                    $propertyName,
-                    $this->getPropertyLabel($propertyName, $paletteProperties),
-                    $this->getGroupLabel($propertyName, $paletteProperties, $groups),
-                    $this->getPropertyValue(
+        return array_filter(
+            array_map(
+                function (string $propertyName) use ($closestThemedNode, $siteNode, $themeProperties, $groups) {
+                    // Hide non-color properties
+                    if (!ThemePropertyHelper::isColorProperty(
                         $propertyName,
-                        $closestNodeWithPalette,
+                        $closestThemedNode
+                    )) {
+                        return null;
+                    }
+                    // Hide empty properties
+                    $value = $this->getPropertyValue(
+                        $propertyName,
+                        $closestThemedNode,
                         $siteNode
-                    )
-                );
-            },
-            array_keys($paletteProperties)
+                    );
+                    if (!$value) {
+                        return null;
+                    }
+                    // Return color property of closest themed node
+                    return $this->createThemeColorOption(
+                        $propertyName,
+                        $this->getPropertyLabel($propertyName, $themeProperties),
+                        $this->getGroupLabel($propertyName, $themeProperties, $groups),
+                        $this->getPropertyValue(
+                            $propertyName,
+                            $closestThemedNode,
+                            $siteNode
+                        )
+                    );
+                },
+                array_keys($themeProperties)
+            )
         );
     }
 
@@ -88,7 +107,7 @@ class ThemeColorsDataSource extends AbstractDataSource
         return $paletteNode->getProperty($propertyName) ?: $siteNode->getProperty($propertyName) ?: '';
     }
 
-    protected function createPaletteColor(
+    protected function createThemeColorOption(
         string $propertyName,
         string $label,
         string $group,
@@ -104,9 +123,9 @@ class ThemeColorsDataSource extends AbstractDataSource
         ];
     }
 
-    protected function getGroupLabel(string $propertyName, array $paletteProperties, array $groups): string
+    protected function getGroupLabel(string $propertyName, array $themeProperties, array $groups): string
     {
-        $group = $paletteProperties[$propertyName]['ui']['inspector']['group'] ?? null;
+        $group = $themeProperties[$propertyName]['ui']['inspector']['group'] ?? null;
         if ($group) {
             return $groups[$group]['label'] ?? 'Andere';
         }
