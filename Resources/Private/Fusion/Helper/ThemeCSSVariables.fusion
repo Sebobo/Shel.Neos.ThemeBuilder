@@ -4,4 +4,16 @@
 prototype(Shel.Neos.ThemeBuilder:Helper.ThemeCSSVariables) {
     @class = 'Shel\\Neos\\ThemeBuilder\\Fusion\\ThemeCSSVariablesImplementation'
     node = ${documentNode}
+
+    @cache {
+        mode = 'cached'
+        entryIdentifier {
+            static = 'DocumentTheme'
+            node = ${documentNode}
+        }
+        entryTags {
+            closestThemedNode = ${Neos.Caching.nodeTag(q(documentNode).closest('[instanceof Shel.Neos.ThemeBuilder:Mixin.PageTheme]').get(0))}
+            site = ${Neos.Caching.nodeTag(site)}
+        }
+    }
 }
