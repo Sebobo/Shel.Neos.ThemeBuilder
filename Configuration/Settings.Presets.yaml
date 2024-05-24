@@ -7,29 +7,47 @@ Neos:
             'colorPicker':
               type: string
               ui:
-                reloadPageIfChanged: true
+                showInCreationDialog: true
+                reloadIfChanged: true
                 inspector:
+                  group: 'design'
                   editor: 'Shel.Neos.ColorPicker/ColorPickerEditor'
                   editorOptions:
                     mode: rgba
             'pixelRange':
               type: integer
               ui:
-                reloadPageIfChanged: true
+                showInCreationDialog: true
+                reloadIfChanged: true
                 inspector:
+                  group: 'design'
                   editor: Neos.Neos/Inspector/Editors/RangeEditor
                   editorOptions:
-                    disabled: true
                     minLabel: 'Minimum'
                     maxLabel: 'Maximum'
                     min: 0
                     max: 100
-                    step: 5
+                    step: 1
                     unit: px
+            'numberRange':
+              type: integer
+              ui:
+                showInCreationDialog: true
+                reloadIfChanged: true
+                inspector:
+                  group: 'design'
+                  editor: Neos.Neos/Inspector/Editors/RangeEditor
+                  editorOptions:
+                    minLabel: 'Minimum'
+                    maxLabel: 'Maximum'
+                    min: 0
+                    max: 100
+                    step: 1
             'colorSelector':
               type: string
               ui:
-                reloadPageIfChanged: true
+                showInCreationDialog: true
+                reloadIfChanged: true
                 inspector:
                   group: 'design'
                   editor: 'Neos.Neos/Inspector/Editors/SelectBoxEditor'

@@ -23,14 +23,13 @@ use Neos\Eel\FlowQuery\FlowQuery;
 use Neos\Flow\Annotations as Flow;
 use Neos\Neos\Domain\Service\ContentContext;
 use Neos\Neos\Service\DataSource\AbstractDataSource;
+use Shel\Neos\ThemeBuilder\Helper\ThemePropertyHelper;
 
 /**
  * Provides a list of all defined colors with previews defined in the theme nodetype mixin
  */
 class ThemeColorsDataSource extends AbstractDataSource
 {
-    public const PAGE_THEME_MIXIN = 'Shel.Neos.ThemeBuilder:Mixin.PageTheme';
-    public const VARIABLE_NAME_EXPRESSION = '/(?<!^)([A-Z\d][a-z]|(?<=[a-z])[A-Z\d])/';
 
     /**
      * @var string
@@ -56,9 +55,9 @@ class ThemeColorsDataSource extends AbstractDataSource
         /** @var ContentContext $context */
         $context = $node->getContext();
         $siteNode = $context->getCurrentSiteNode();
-        $closestNodeWithPalette = (new FlowQuery([$node]))->closest('[instanceof ' . self::PAGE_THEME_MIXIN . ']')->get(0);
+        $closestNodeWithPalette = (new FlowQuery([$node]))->closest('[instanceof ' . ThemePropertyHelper::PAGE_THEME_MIXIN . ']')->get(0);
 
-        $paletteNodeType = $this->nodeTypeManager->getNodeType(self::PAGE_THEME_MIXIN);
+        $paletteNodeType = $this->nodeTypeManager->getNodeType(ThemePropertyHelper::PAGE_THEME_MIXIN);
         $paletteProperties = $paletteNodeType->getProperties();
         $groups = $paletteNodeType->getConfiguration('ui.inspector.groups');
 
@@ -95,7 +94,7 @@ class ThemeColorsDataSource extends AbstractDataSource
         string $group,
         string $propertyValue
     ): array {
-        $value = strtolower(preg_replace(self::VARIABLE_NAME_EXPRESSION, '-$1', $propertyName));
+        $value = strtolower(preg_replace(ThemePropertyHelper::VARIABLE_NAME_EXPRESSION, '-$1', $propertyName));
         return [
             'label' => $label,
             'value' => 'var(--' . $value . ')',

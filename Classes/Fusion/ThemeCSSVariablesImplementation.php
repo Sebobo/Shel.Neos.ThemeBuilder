@@ -24,6 +24,7 @@ use Neos\Flow\Annotations as Flow;
 use Neos\Fusion\FusionObjects\AbstractFusionObject;
 use Neos\Neos\Domain\Service\ContentContext;
 use Shel\Neos\ThemeBuilder\DataSource\ThemeColorsDataSource;
+use Shel\Neos\ThemeBuilder\Helper\ThemePropertyHelper;
 
 /**
  * Renders all defined palette properties of the given node or its closest parent with
@@ -49,11 +50,9 @@ class ThemeCSSVariablesImplementation extends AbstractFusionObject
         $context = $node->getContext();
         $siteNode = $context->getCurrentSiteNode();
         $closestNodeWithTheme = (new FlowQuery([$node]))
-            ->closest('[instanceof ' . ThemeColorsDataSource::PAGE_THEME_MIXIN . ']')->get(0);
+            ->closest('[instanceof ' . ThemePropertyHelper::PAGE_THEME_MIXIN . ']')->get(0);
 
-        $themeProperties = $this->nodeTypeManager
-            ->getNodeType(ThemeColorsDataSource::PAGE_THEME_MIXIN)
-            ->getProperties();
+        $themeNodeType = $this->nodeTypeManager->getNodeType(ThemePropertyHelper::PAGE_THEME_MIXIN);
 
         return implode(
             ';',
@@ -67,11 +66,15 @@ class ThemeCSSVariablesImplementation extends AbstractFusionObject
                             return null;
                         }
                         $cssPropertyName = strtolower(
-                            preg_replace(ThemeColorsDataSource::VARIABLE_NAME_EXPRESSION, '-$1', $propertyName)
+                            preg_replace(ThemePropertyHelper::VARIABLE_NAME_EXPRESSION, '-$1', $propertyName)
                         );
-                        return '--' . $cssPropertyName . ':' . $value;
+                        $propertyUnit = ThemePropertyHelper::getPropertyUnit(
+                            $propertyName,
+                            $closestNodeWithTheme
+                        );
+                        return '--' . $cssPropertyName . ':' . $value . $propertyUnit;
                     },
-                    array_keys($themeProperties)
+                    array_keys($themeNodeType->getProperties())
                 )
             )
         );
