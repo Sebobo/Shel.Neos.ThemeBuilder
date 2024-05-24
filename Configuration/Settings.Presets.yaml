@@ -23,8 +23,6 @@ Neos:
                   group: 'design'
                   editor: Neos.Neos/Inspector/Editors/RangeEditor
                   editorOptions:
-                    minLabel: 'Minimum'
-                    maxLabel: 'Maximum'
                     min: 0
                     max: 100
                     step: 1
@@ -38,8 +36,6 @@ Neos:
                   group: 'design'
                   editor: Neos.Neos/Inspector/Editors/RangeEditor
                   editorOptions:
-                    minLabel: 'Minimum'
-                    maxLabel: 'Maximum'
                     min: 0
                     max: 100
                     step: 1
