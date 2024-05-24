@@ -65,14 +65,7 @@ class ThemeCSSVariablesImplementation extends AbstractFusionObject
                         if (!$value) {
                             return null;
                         }
-                        $cssPropertyName = strtolower(
-                            preg_replace(ThemePropertyHelper::VARIABLE_NAME_EXPRESSION, '-$1', $propertyName)
-                        );
-                        $propertyUnit = ThemePropertyHelper::getPropertyUnit(
-                            $propertyName,
-                            $closestNodeWithTheme
-                        );
-                        return '--' . $cssPropertyName . ':' . $value . $propertyUnit;
+                        return ThemePropertyHelper::convertToCSSVariableDefinition($propertyName, $value, $closestNodeWithTheme);
                     },
                     array_keys($themeNodeType->getProperties())
                 )

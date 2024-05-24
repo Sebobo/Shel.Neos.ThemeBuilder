@@ -69,7 +69,7 @@ class ThemeColorsDataSource extends AbstractDataSource
                     // Hide non-color properties
                     if (!ThemePropertyHelper::isColorProperty(
                         $propertyName,
-                        $closestThemedNode
+                        $themeProperties
                     )) {
                         return null;
                     }
