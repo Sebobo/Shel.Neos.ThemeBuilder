@@ -7,7 +7,6 @@ Neos:
             'colorPicker':
               type: string
               ui:
-                showInCreationDialog: true
                 reloadIfChanged: true
                 inspector:
                   group: 'design'
@@ -17,7 +16,6 @@ Neos:
             'pixelRange':
               type: integer
               ui:
-                showInCreationDialog: true
                 reloadIfChanged: true
                 inspector:
                   group: 'design'
@@ -30,7 +28,6 @@ Neos:
             'numberRange':
               type: integer
               ui:
-                showInCreationDialog: true
                 reloadIfChanged: true
                 inspector:
                   group: 'design'
@@ -42,7 +39,6 @@ Neos:
             'colorSelector':
               type: string
               ui:
-                showInCreationDialog: true
                 reloadIfChanged: true
                 inspector:
                   group: 'design'
