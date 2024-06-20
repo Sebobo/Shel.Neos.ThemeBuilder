@@ -46,5 +46,7 @@ Neos:
                   editorOptions:
                     dataSourceIdentifier: 'shel-neos-themebuilder-theme-colors'
                     dataSourceDisableCaching: true
+                    dataSourceAdditionalData:
+                      filterUnsetProperties: true
                     placeholder: 'Standard'
                     allowEmpty: true
