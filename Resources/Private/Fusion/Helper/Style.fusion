@@ -1,0 +1,19 @@
+##
+# Merges defined props as CSS to be used in a style attribute.
+#
+# Example:
+# myStyle = Shel.Neos.ThemeBuilder:Helper.Styles {
+#     --my-prop = '20px'
+#     --my-prop-2 = 5
+# }
+# renderer = afx`
+#   <div style={props.myStyle}>Some text</div>
+# `
+#
+# Result:
+# <div style="--my-prop: 20px; --my-prop-2: 5;">Some text</div>
+#
+prototype(Shel.Neos.ThemeBuilder:Helper.Styles) {
+    @class = 'Shel\\Neos\\ThemeBuilder\\Fusion\\StylesImplementation'
+    @sortProperties = false
+}
