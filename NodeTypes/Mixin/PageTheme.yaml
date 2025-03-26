@@ -20,7 +20,7 @@
           icon: font
           tab: themeLight
           collapsed: true
-  # Add your custom theme properties here
+  # Add your custom theme properties by overriding this mixin in your site package.
 #  properties:
 #    primaryColor:
 #      options:
