@@ -64,17 +64,20 @@ class ThemeColorsDataSource extends AbstractDataSource
 
         $nodeTypeManager = $contentRepository->getNodeTypeManager();
         $themeNodeType = $nodeTypeManager->getNodeType(ThemePropertyHelper::PAGE_THEME_MIXIN);
+        $currentNodeType = $nodeTypeManager->getNodeType($node->nodeTypeName);
 
-        $themedAncestorNodes = $subgraph->findAncestorNodes(
+        $themedNodeHierarchy = $subgraph->findAncestorNodes(
             $node->aggregateId,
             FindAncestorNodesFilter::create(
                 NodeTypeCriteria::fromFilterString(ThemePropertyHelper::PAGE_THEME_MIXIN)
             )
         );
-        $themedRootNode = $themedAncestorNodes->first() ?? $node;
-        $closestThemedNode = $themedAncestorNodes->count() > 1 ? $themedAncestorNodes->last() : $node;
 
-        if (!$themeNodeType || !$closestThemedNode) {
+        if ($currentNodeType?->isOfType(ThemePropertyHelper::PAGE_THEME_MIXIN)) {
+            $themedNodeHierarchy->prepend($node);
+        }
+
+        if (!$themeNodeType || $themedNodeHierarchy->count() === 0) {
             return [];
         }
 
@@ -84,8 +87,7 @@ class ThemeColorsDataSource extends AbstractDataSource
         return array_filter(
             array_map(
                 function (string $propertyName) use (
-                    $closestThemedNode,
-                    $themedRootNode,
+                    $themedNodeHierarchy,
                     $themeProperties,
                     $groups,
                     $filterUnsetProperties
@@ -98,12 +100,11 @@ class ThemeColorsDataSource extends AbstractDataSource
                         return null;
                     }
                     // Hide empty properties
-                    $value = $this->getPropertyValue(
+                    $value = ThemePropertyHelper::getPropertyValueFromHierarchy(
                         $propertyName,
-                        $closestThemedNode,
-                        $themedRootNode
+                        $themedNodeHierarchy
                     );
-                    if (!$value && $filterUnsetProperties) {
+                    if ($value === null && $filterUnsetProperties) {
                         return null;
                     }
 
@@ -112,24 +113,15 @@ class ThemeColorsDataSource extends AbstractDataSource
                         $propertyName,
                         $this->getPropertyLabel($propertyName, $themeProperties),
                         $this->getGroupLabel($propertyName, $themeProperties, $groups),
-                        $this->getPropertyValue(
+                        ThemePropertyHelper::getPropertyValueFromHierarchy(
                             $propertyName,
-                            $closestThemedNode,
-                            $themedRootNode
+                            $themedNodeHierarchy
                         )
                     );
                 },
                 array_keys($themeProperties)
             )
         );
-    }
-
-    protected function getPropertyValue(
-        string $propertyName,
-        Node $paletteNode,
-        Node $siteNode
-    ): string {
-        return $paletteNode->getProperty($propertyName) ?: $siteNode->getProperty($propertyName) ?: '';
     }
 
     /**

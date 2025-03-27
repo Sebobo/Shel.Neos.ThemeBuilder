@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Shel\Neos\ThemeBuilder\Helper;
 
 use Neos\ContentRepository\Core\NodeType\NodeType;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Nodes;
 use Neos\Flow\Annotations as Flow;
 
 #[Flow\Proxy(false)]
@@ -40,5 +41,18 @@ class ThemePropertyHelper
         $cssVariableName = self::convertToCSSVariableName($propertyName);
         $propertyUnit = self::getPropertyUnit($propertyName, $nodeType);
         return '--' . $cssVariableName . ':' . $value . $propertyUnit;
+    }
+
+    public static function getPropertyValueFromHierarchy(
+        string $propertyName,
+        Nodes $themedNodeHierarchy,
+    ): mixed {
+        foreach ($themedNodeHierarchy->getIterator() as $node) {
+            $value = $node->getProperty($propertyName);
+            if ($value) {
+                return $value;
+            }
+        }
+        return null;
     }
 }

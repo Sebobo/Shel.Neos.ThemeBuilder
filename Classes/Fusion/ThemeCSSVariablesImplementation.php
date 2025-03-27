@@ -57,41 +57,39 @@ class ThemeCSSVariablesImplementation extends AbstractFusionObject
 
         $nodeTypeManager = $contentRepository->getNodeTypeManager();
         $themeNodeType = $nodeTypeManager->getNodeType(ThemePropertyHelper::PAGE_THEME_MIXIN);
+        $currentNodeType = $nodeTypeManager->getNodeType($node->nodeTypeName);
 
-        $themedAncestorNodes = $subgraph->findAncestorNodes(
+        $themedNodeHierarchy = $subgraph->findAncestorNodes(
             $node->aggregateId,
             FindAncestorNodesFilter::create(
                 NodeTypeCriteria::fromFilterString(ThemePropertyHelper::PAGE_THEME_MIXIN)
             )
         );
-        $themedRootNode = $themedAncestorNodes->first() ?? $node;
-        $closestThemedNode = $themedAncestorNodes->count() > 1 ? $themedAncestorNodes->last() : $node;
 
-        if (!$themeNodeType || !$closestThemedNode) {
-            return '';
+        if ($currentNodeType?->isOfType(ThemePropertyHelper::PAGE_THEME_MIXIN)) {
+            $themedNodeHierarchy->prepend($node);
         }
 
-        $closestThemedNodeType = $nodeTypeManager->getNodeType($closestThemedNode->nodeTypeName);
+        if (!$themeNodeType || $themedNodeHierarchy->count() === 0) {
+            return '';
+        }
 
         return implode(
             ';',
             array_filter(
                 array_map(
-                    static function (string $propertyName) use (
-                        $closestThemedNode,
-                        $closestThemedNodeType,
-                        $themedRootNode
-                    ) {
-                        $value = $closestThemedNode->getProperty($propertyName) ?: $themedRootNode->getProperty(
-                            $propertyName
-                        ) ?: '';
-                        if (!$value) {
+                    static function (string $propertyName) use ($themedNodeHierarchy, $themeNodeType) {
+                        $value = ThemePropertyHelper::getPropertyValueFromHierarchy(
+                            $propertyName,
+                            $themedNodeHierarchy
+                        );
+                        if ($value === null) {
                             return null;
                         }
                         return ThemePropertyHelper::convertToCSSVariableDefinition(
                             $propertyName,
                             $value,
-                            $closestThemedNodeType
+                            $themeNodeType
                         );
                     },
                     array_keys($themeNodeType->getProperties())
