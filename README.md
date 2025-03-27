@@ -27,6 +27,8 @@ composer require --no-update shel/neos-theme-builder
 
 Then run `composer update shel/neos-theme-builder` in your project root.
 
+It is suggested to also install `shel/neos-colorpicker` in the same way to have a color picker for the theme properties.
+
 ## Usage
 
 ### Define theme properties

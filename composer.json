@@ -1,35 +1,39 @@
 {
-  "name": "shel/neos-themebuilder",
-  "type": "neos-plugin",
-  "description": "A plugin for NeosCMS which provides integrator/editor tools to define and use themes.",
-  "license": "GPL-3.0",
-  "keywords": [
-    "neos",
-    "neoscms",
-    "themebuilder",
-    "theme",
-    "colorpicker",
-    "editor"
-  ],
-  "authors": [
-    {
-      "name": "Sebastian Helzle",
-      "email": "sebastian@helzle.it",
-      "homepage": "https://www.helzle.it",
-      "role": "Developer"
+    "name": "shel/neos-themebuilder",
+    "type": "neos-plugin",
+    "description": "A plugin for NeosCMS which provides integrator/editor tools to define and use themes.",
+    "license": "GPL-3.0",
+    "keywords": [
+        "neos",
+        "neoscms",
+        "themebuilder",
+        "theme",
+        "colorpicker",
+        "editor"
+    ],
+    "authors": [
+        {
+            "name": "Sebastian Helzle",
+            "email": "sebastian@helzle.it",
+            "homepage": "https://www.helzle.it",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=8.2",
+        "neos/neos": "^8.3"
+    },
+    "suggest": {
+        "shel/neos-colorpicker": "If you want to use the color picker in the theme builder, you need to install this package."
+    },
+    "autoload": {
+        "psr-4": {
+            "Shel\\Neos\\ThemeBuilder\\": "Classes"
+        }
+    },
+    "extra": {
+        "neos": {
+            "package-key": "Shel.Neos.ThemeBuilder"
+        }
     }
-  ],
-  "require": {
-    "neos/neos": "^8.3"
-  },
-  "autoload": {
-    "psr-4": {
-      "Shel\\Neos\\ThemeBuilder\\": "Classes"
-    }
-  },
-  "extra": {
-    "neos": {
-      "package-key": "Shel.Neos.ThemeBuilder"
-    }
-  }
 }
