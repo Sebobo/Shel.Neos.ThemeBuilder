@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Shel\Neos\ThemeBuilder\Helper;
 
-use Neos\ContentRepository\Domain\Model\NodeInterface;
+use Neos\ContentRepository\Core\NodeType\NodeType;
 use Neos\Flow\Annotations as Flow;
 
 #[Flow\Proxy(false)]
@@ -14,10 +14,9 @@ class ThemePropertyHelper
     public const VARIABLE_NAME_EXPRESSION = '/(?<!^)([A-Z\d][a-z]|(?<=[a-z])[A-Z\d])/';
     public const COLOR_PICKER_PRESET = 'themeBuilder.colorPicker';
 
-    public static function getPropertyUnit(string $propertyName, NodeInterface $themeNode): string
+    public static function getPropertyUnit(string $propertyName, NodeType $nodeType): string
     {
-        return $themeNode
-            ->getNodeType()
+        return $nodeType
             ->getConfiguration('properties.' . $propertyName . '.ui.inspector.editorOptions.unit') ?: '';
     }
 
@@ -36,10 +35,10 @@ class ThemePropertyHelper
     public static function convertToCSSVariableDefinition(
         string $propertyName,
         mixed $value,
-        NodeInterface $closestNodeWithTheme
+        NodeType $nodeType
     ): string {
         $cssVariableName = self::convertToCSSVariableName($propertyName);
-        $propertyUnit = self::getPropertyUnit($propertyName, $closestNodeWithTheme);
+        $propertyUnit = self::getPropertyUnit($propertyName, $nodeType);
         return '--' . $cssVariableName . ':' . $value . $propertyUnit;
     }
 }

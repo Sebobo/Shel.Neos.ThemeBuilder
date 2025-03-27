@@ -14,16 +14,13 @@ namespace Shel\Neos\ThemeBuilder\Fusion;
  * source code.
  */
 
-use Neos\ContentRepository\Domain\Model\NodeInterface;
-use Neos\ContentRepository\Domain\Service\NodeTypeManager;
-use Neos\ContentRepository\Exception\NodeException;
-use Neos\ContentRepository\Exception\NodeTypeNotFoundException;
-use Neos\Eel\Exception;
-use Neos\Eel\FlowQuery\FlowQuery;
+use Neos\ContentRepository\Core\Feature\Security\Exception\AccessDenied;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindAncestorNodesFilter;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\NodeType\NodeTypeCriteria;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Node;
+use Neos\ContentRepositoryRegistry\ContentRepositoryRegistry;
 use Neos\Flow\Annotations as Flow;
 use Neos\Fusion\FusionObjects\AbstractFusionObject;
-use Neos\Neos\Domain\Service\ContentContext;
-use Shel\Neos\ThemeBuilder\DataSource\ThemeColorsDataSource;
 use Shel\Neos\ThemeBuilder\Helper\ThemePropertyHelper;
 
 /**
@@ -32,11 +29,13 @@ use Shel\Neos\ThemeBuilder\Helper\ThemePropertyHelper;
  */
 class ThemeCSSVariablesImplementation extends AbstractFusionObject
 {
+
     #[Flow\Inject]
-    protected NodeTypeManager $nodeTypeManager;
+    protected ContentRepositoryRegistry $contentRepositoryRegistry;
 
     /**
-     * @throws Exception|NodeTypeNotFoundException|NodeException
+     * Renders all defined palette properties merged from the given nodes closest themed node and the
+     * theme root node (usually the site node).
      */
     public function evaluate(): string
     {
@@ -46,26 +45,54 @@ class ThemeCSSVariablesImplementation extends AbstractFusionObject
             return '';
         }
 
-        /** @var ContentContext $context */
-        $context = $node->getContext();
-        $siteNode = $context->getCurrentSiteNode();
-        $closestNodeWithTheme = (new FlowQuery([$node]))
-            ->closest('[instanceof ' . ThemePropertyHelper::PAGE_THEME_MIXIN . ']')->get(0);
+        $contentRepository = $this->contentRepositoryRegistry->get($node->contentRepositoryId);
+        try {
+            $subgraph = $contentRepository->getContentSubgraph(
+                $node->workspaceName,
+                $node->dimensionSpacePoint
+            );
+        } catch (AccessDenied) {
+            return '';
+        }
 
-        $themeNodeType = $this->nodeTypeManager->getNodeType(ThemePropertyHelper::PAGE_THEME_MIXIN);
+        $nodeTypeManager = $contentRepository->getNodeTypeManager();
+        $themeNodeType = $nodeTypeManager->getNodeType(ThemePropertyHelper::PAGE_THEME_MIXIN);
+
+        $themedAncestorNodes = $subgraph->findAncestorNodes(
+            $node->aggregateId,
+            FindAncestorNodesFilter::create(
+                NodeTypeCriteria::fromFilterString(ThemePropertyHelper::PAGE_THEME_MIXIN)
+            )
+        );
+        $themedRootNode = $themedAncestorNodes->first() ?? $node;
+        $closestThemedNode = $themedAncestorNodes->count() > 1 ? $themedAncestorNodes->last() : $node;
+
+        if (!$themeNodeType || !$closestThemedNode) {
+            return '';
+        }
+
+        $closestThemedNodeType = $nodeTypeManager->getNodeType($closestThemedNode->nodeTypeName);
 
         return implode(
             ';',
             array_filter(
                 array_map(
-                    static function (string $propertyName) use ($closestNodeWithTheme, $siteNode) {
-                        $value = $closestNodeWithTheme->getProperty($propertyName) ?: $siteNode->getProperty(
+                    static function (string $propertyName) use (
+                        $closestThemedNode,
+                        $closestThemedNodeType,
+                        $themedRootNode
+                    ) {
+                        $value = $closestThemedNode->getProperty($propertyName) ?: $themedRootNode->getProperty(
                             $propertyName
                         ) ?: '';
                         if (!$value) {
                             return null;
                         }
-                        return ThemePropertyHelper::convertToCSSVariableDefinition($propertyName, $value, $closestNodeWithTheme);
+                        return ThemePropertyHelper::convertToCSSVariableDefinition(
+                            $propertyName,
+                            $value,
+                            $closestThemedNodeType
+                        );
                     },
                     array_keys($themeNodeType->getProperties())
                 )
@@ -73,7 +100,7 @@ class ThemeCSSVariablesImplementation extends AbstractFusionObject
         );
     }
 
-    protected function getNode(): ?NodeInterface
+    protected function getNode(): ?Node
     {
         return $this->fusionValue('node');
     }
