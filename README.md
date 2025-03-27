@@ -1,6 +1,7 @@
 # Theme builder for Neos CMS
 
-This is a Neos CMS plugin for managing themes with CSS variables from the backend.
+This is a Neos CMS plugin for managing themes with CSS variables from the backend and for 
+simplifying rendering of style attributes in AFX.
 
 By defining theme properties in a NodeType mixin, these can be configured on the homepage or 
 subpages and used to globally control your projects look & feel, or to allow choosing styles for individual
@@ -52,9 +53,11 @@ Then extend your page NodeType with this mixin:
     'Shel.Neos.ThemeBuilder:Mixin.PageTheme': true
 ```
 
-Now you can set the primary color in the inspector of your page and use the 
+Now you can set the primary color in the inspector tab with the sun icon of your page and use the 
 value in your project via CSS variable `var(--primary-color)`.
-You can find all generated CSS variables in the head of your document contained in a style tag.
+You can find all generated CSS variables in the head of your html document contained in a style tag.
+
+By applying the mixin to any page you can also have local overrides for landing pages or other special pages.
 
 ### Use theme properties in other elements
 
