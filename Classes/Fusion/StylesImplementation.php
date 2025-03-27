@@ -14,15 +14,28 @@ namespace Shel\Neos\ThemeBuilder\Fusion;
  * source code.
  */
 
+use Neos\Flow\Configuration\Exception\InvalidConfigurationException;
+use Neos\Flow\Mvc\Exception\StopActionException;
+use Neos\Fusion\Exception;
 use Neos\Fusion\FusionObjects\AbstractArrayFusionObject;
 
+/**
+ * Merges the properties of the Fusion object into a CSS style string.
+ * Empty values are ignored.
+ */
 class StylesImplementation extends AbstractArrayFusionObject
 {
+    /**
+     * @throws Exception
+     * @throws InvalidConfigurationException
+     * @throws \Neos\Flow\Security\Exception
+     * @throws StopActionException
+     */
     public function evaluate(): string
     {
         $styles = $this->evaluateNestedProperties();
 
-        return array_reduce(array_keys($styles), function ($carry, $key) use ($styles) {
+        return array_reduce(array_keys($styles), static function ($carry, $key) use ($styles) {
             $value = $styles[$key];
             return $value !== null ? $carry . $key . ':' . $value . ';' : $carry;
         }, '');

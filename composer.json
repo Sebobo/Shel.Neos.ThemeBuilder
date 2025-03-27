@@ -21,7 +21,7 @@
     ],
     "require": {
         "php": ">=8.2",
-        "neos/neos": "^8.3"
+        "neos/neos": "^9.0"
     },
     "suggest": {
         "shel/neos-colorpicker": "If you want to use the color picker in the theme builder, you need to install this package."

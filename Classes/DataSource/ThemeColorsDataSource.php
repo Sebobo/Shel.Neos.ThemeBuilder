@@ -14,14 +14,12 @@ namespace Shel\Neos\ThemeBuilder\DataSource;
  * source code.
  */
 
-use Neos\ContentRepository\Domain\Model\NodeInterface;
-use Neos\ContentRepository\Domain\Service\NodeTypeManager;
-use Neos\ContentRepository\Exception\NodeException;
-use Neos\ContentRepository\Exception\NodeTypeNotFoundException;
-use Neos\Eel\Exception;
-use Neos\Eel\FlowQuery\FlowQuery;
+use Neos\ContentRepository\Core\Feature\Security\Exception\AccessDenied;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindAncestorNodesFilter;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\NodeType\NodeTypeCriteria;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Node;
+use Neos\ContentRepositoryRegistry\ContentRepositoryRegistry;
 use Neos\Flow\Annotations as Flow;
-use Neos\Neos\Domain\Service\ContentContext;
 use Neos\Neos\Service\DataSource\AbstractDataSource;
 use Shel\Neos\ThemeBuilder\Helper\ThemePropertyHelper;
 
@@ -30,23 +28,22 @@ use Shel\Neos\ThemeBuilder\Helper\ThemePropertyHelper;
  */
 class ThemeColorsDataSource extends AbstractDataSource
 {
+    #[Flow\Inject]
+    protected ContentRepositoryRegistry $contentRepositoryRegistry;
 
     /**
      * @var string
      */
     protected static $identifier = 'shel-neos-themebuilder-theme-colors';
 
-    #[Flow\Inject]
-    protected NodeTypeManager $nodeTypeManager;
-
     /**
      * Render each palette property of the nodetype "Shel.Neos.ThemeBuilder:Mixin.PageTheme" as selectable color/value with a preview
      *
      * @param array{filterUnsetProperties?: bool} $arguments
-     * @throws Exception|NodeException|NodeTypeNotFoundException
+     * @return array<array{label: string, value: string, group: string, preview: string}>
      */
     public function getData(
-        NodeInterface $node = null,
+        Node $node = null,
         array $arguments = []
     ): array {
         if (!$node) {
@@ -55,14 +52,32 @@ class ThemeColorsDataSource extends AbstractDataSource
 
         $filterUnsetProperties = ($arguments['filterUnsetProperties'] ?? true) !== 'false';
 
-        /** @var ContentContext $context */
-        $context = $node->getContext();
-        $siteNode = $context->getCurrentSiteNode();
-        $closestThemedNode = (new FlowQuery([$node]))->closest(
-            '[instanceof ' . ThemePropertyHelper::PAGE_THEME_MIXIN . ']'
-        )->get(0);
+        $contentRepository = $this->contentRepositoryRegistry->get($node->contentRepositoryId);
+        try {
+            $subgraph = $contentRepository->getContentSubgraph(
+                $node->workspaceName,
+                $node->dimensionSpacePoint
+            );
+        } catch (AccessDenied) {
+            return [];
+        }
 
-        $themeNodeType = $this->nodeTypeManager->getNodeType(ThemePropertyHelper::PAGE_THEME_MIXIN);
+        $nodeTypeManager = $contentRepository->getNodeTypeManager();
+        $themeNodeType = $nodeTypeManager->getNodeType(ThemePropertyHelper::PAGE_THEME_MIXIN);
+
+        $themedAncestorNodes = $subgraph->findAncestorNodes(
+            $node->aggregateId,
+            FindAncestorNodesFilter::create(
+                NodeTypeCriteria::fromFilterString(ThemePropertyHelper::PAGE_THEME_MIXIN)
+            )
+        );
+        $themedRootNode = $themedAncestorNodes->first() ?? $node;
+        $closestThemedNode = $themedAncestorNodes->count() > 1 ? $themedAncestorNodes->last() : $node;
+
+        if (!$themeNodeType || !$closestThemedNode) {
+            return [];
+        }
+
         $themeProperties = $themeNodeType->getProperties();
         $groups = $themeNodeType->getConfiguration('ui.inspector.groups');
 
@@ -70,7 +85,7 @@ class ThemeColorsDataSource extends AbstractDataSource
             array_map(
                 function (string $propertyName) use (
                     $closestThemedNode,
-                    $siteNode,
+                    $themedRootNode,
                     $themeProperties,
                     $groups,
                     $filterUnsetProperties
@@ -86,7 +101,7 @@ class ThemeColorsDataSource extends AbstractDataSource
                     $value = $this->getPropertyValue(
                         $propertyName,
                         $closestThemedNode,
-                        $siteNode
+                        $themedRootNode
                     );
                     if (!$value && $filterUnsetProperties) {
                         return null;
@@ -100,7 +115,7 @@ class ThemeColorsDataSource extends AbstractDataSource
                         $this->getPropertyValue(
                             $propertyName,
                             $closestThemedNode,
-                            $siteNode
+                            $themedRootNode
                         )
                     );
                 },
@@ -111,12 +126,15 @@ class ThemeColorsDataSource extends AbstractDataSource
 
     protected function getPropertyValue(
         string $propertyName,
-        NodeInterface $paletteNode,
-        NodeInterface $siteNode
+        Node $paletteNode,
+        Node $siteNode
     ): string {
         return $paletteNode->getProperty($propertyName) ?: $siteNode->getProperty($propertyName) ?: '';
     }
 
+    /**
+     * @return array{label: string, value: string, group: string, preview: string}
+     */
     protected function createThemeColorOption(
         string $propertyName,
         string $label,
