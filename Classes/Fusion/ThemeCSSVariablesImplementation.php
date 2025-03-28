@@ -59,10 +59,10 @@ class ThemeCSSVariablesImplementation extends AbstractFusionObject
             array_filter(
                 array_map(
                     static function (string $propertyName) use ($closestNodeWithTheme, $siteNode) {
-                        $value = $closestNodeWithTheme->getProperty($propertyName) ?: $siteNode->getProperty(
+                        $value = $closestNodeWithTheme->getProperty($propertyName) ?? $siteNode->getProperty(
                             $propertyName
-                        ) ?: '';
-                        if (!$value) {
+                        );
+                        if ($value === '' || $value === null) {
                             return null;
                         }
                         return ThemePropertyHelper::convertToCSSVariableDefinition($propertyName, $value, $closestNodeWithTheme);
