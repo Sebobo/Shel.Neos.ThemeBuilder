@@ -22,7 +22,7 @@ class StylesImplementation extends AbstractArrayFusionObject
     {
         $styles = $this->evaluateNestedProperties();
 
-        return array_reduce(array_keys($styles), function ($carry, $key) use ($styles) {
+        return array_reduce(array_keys($styles), static function ($carry, $key) use ($styles) {
             $value = $styles[$key];
             return $value !== null ? $carry . $key . ':' . $value . ';' : $carry;
         }, '');
