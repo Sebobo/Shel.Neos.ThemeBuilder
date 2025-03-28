@@ -24,7 +24,7 @@ class StylesImplementation extends AbstractArrayFusionObject
 
         return array_reduce(array_keys($styles), static function ($carry, $key) use ($styles) {
             $value = $styles[$key];
-            return $value !== null ? $carry . $key . ':' . $value . ';' : $carry;
+            return $value !== null && $value !== '' ? $carry . $key . ':' . $value . ';' : $carry;
         }, '');
     }
 }
