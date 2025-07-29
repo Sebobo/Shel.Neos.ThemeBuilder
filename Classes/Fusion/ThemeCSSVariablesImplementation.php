@@ -67,7 +67,7 @@ class ThemeCSSVariablesImplementation extends AbstractFusionObject
         );
 
         if ($currentNodeType?->isOfType(ThemePropertyHelper::PAGE_THEME_MIXIN)) {
-            $themedNodeHierarchy->prepend($node);
+            $themedNodeHierarchy = $themedNodeHierarchy->prepend($node);
         }
 
         if (!$themeNodeType || $themedNodeHierarchy->count() === 0) {
