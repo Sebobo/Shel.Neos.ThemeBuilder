@@ -23,7 +23,8 @@ class ThemePropertyHelper
 
     public static function isColorProperty(string $propertyName, array $propertiesConfiguration): bool
     {
-        return $propertiesConfiguration[$propertyName]['options']['preset'] === self::COLOR_PICKER_PRESET;
+        $preset = $propertiesConfiguration[$propertyName]['options']['preset'] ?? '';
+        return $preset === self::COLOR_PICKER_PRESET;
     }
 
     public static function convertToCSSVariableName(string $propertyName): string
