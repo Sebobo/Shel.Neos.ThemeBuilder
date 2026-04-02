@@ -111,10 +111,10 @@ class ThemeColorsDataSource extends AbstractDataSource
 
     protected function getPropertyValue(
         string $propertyName,
-        NodeInterface $paletteNode,
+        ?NodeInterface $paletteNode,
         NodeInterface $siteNode
     ): string {
-        return $paletteNode->getProperty($propertyName) ?: $siteNode->getProperty($propertyName) ?: '';
+        return $paletteNode?->getProperty($propertyName) ?: $siteNode->getProperty($propertyName) ?: '';
     }
 
     protected function createThemeColorOption(
