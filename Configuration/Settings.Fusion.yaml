@@ -1,0 +1,4 @@
+Neos:
+  Fusion:
+    defaultContext:
+      ThemeBuilder: Shel\Neos\ThemeBuilder\Eel\ThemeHelper

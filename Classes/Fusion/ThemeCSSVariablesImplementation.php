@@ -83,7 +83,7 @@ class ThemeCSSVariablesImplementation extends AbstractFusionObject
                             $propertyName,
                             $themedNodeHierarchy
                         );
-                        if ($value === null) {
+                        if ($value === '' || $value === null) {
                             return null;
                         }
                         return ThemePropertyHelper::convertToCSSVariableDefinition(

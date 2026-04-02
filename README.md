@@ -109,6 +109,28 @@ This will render the following HTML:
 
 Note: Empty or `null` values will be filtered out automatically, so you don't need conditions for standard cases.
 
+### Format values
+
+You can use the `ThemeBuilder` Eel helper to format values like pixels, percentages and degrees:
+
+```neosfusion
+prototype(My.Vendor:Content.MyComponent) < prototype(Neos.Fusion:Component) {
+    borderRadius = ${q(node).property('borderRadius')}
+    width = ${q(node).property('width')}
+    gradientAngle = ${q(node).property('gradientAngle')}
+    
+    @private.style = Shel.Neos.ThemeBuilder:Helper.Styles {
+        --border-radius = ${ThemeBuilder.formatPixels(props.borderRadius)}
+        --width = ${ThemeBuilder.formatPercentage(props.width)}
+        --gradient-angle = ${ThemeBuilder.formatDegrees(props.gradientAngle)}
+    }
+
+    renderer = afx`
+        <div style={private.style}>Some test</div>
+    `
+}
+```
+
 ## Contributions
 
 Contributions are very welcome! 
