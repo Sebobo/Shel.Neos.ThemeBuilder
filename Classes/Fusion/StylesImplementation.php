@@ -24,6 +24,10 @@ class StylesImplementation extends AbstractArrayFusionObject
 
         return array_reduce(array_keys($styles), static function ($carry, $key) use ($styles) {
             $value = $styles[$key];
+            // Skip when setting a custom CSS property to itself
+            if ($value === 'var(' . $key . ')' && str_starts_with($key, '--')) {
+                return $carry;
+            }
             return $value !== null && $value !== '' ? $carry . $key . ':' . $value . ';' : $carry;
         }, '');
     }
